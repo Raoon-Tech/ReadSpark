@@ -34,6 +34,19 @@ Cualquier versión no verificada → sello **`VERSION PENDIENTE DE VERIFICACIÓN
 
 **Criterio de inclusión:** todas las entradas con licencia verificada pertenecen a la allowlist (MIT / BSD-3-Clause / Apache-2.0). La única entrada pendiente de verificación (#5) está bloqueada con sello hasta confirmar.
 
+### 1.1 Dependencias instaladas en la Fase 1 (resueltas en `pubspec.lock`)
+
+Licencias verificadas leyendo el archivo `LICENSE` de la caché local de pub (`%LOCALAPPDATA%\Pub\Cache\hosted\pub.dev`, 29-sep-2026):
+
+| Nombre | Versión resuelta | Tipo | Licencia (evidencia local) | Uso |
+|---|---|---|---|---|
+| `flutter_riverpod` | **3.4.3** | directa | **MIT** ✅ (LICENSE en caché: "Remi Rousselet") | Contenedor de providers (`ProviderScope`) |
+| `riverpod` | **3.4.3** | transitiva | **MIT** ✅ (LICENSE en caché) | Núcleo de Riverpod |
+| `flutter_lints` | **6.0.0** | dev | **BSD-3-Clause** ✅ (LICENSE en caché: "The Flutter Authors", cláusula de redistribución BSD) | Reglas de `analysis_options.yaml` |
+| `cupertino_icons` | **1.0.9** | directa | **MIT** ✅ (LICENSE en caché: "Vladimir Kharlampidi") | Iconos iOS-style (plantilla Flutter) |
+
+Verificación automatizada en CI: el paso *Dependency license check* de `.github/workflows/ci.yml` recorre `pubspec.lock` y falla si algún paquete alojado contiene licencias GPL/LGPL/MPL fuera de la allowlist.
+
 ---
 
 ## 2. Dependencias de plataforma (toolchain, no pub.dev)

@@ -29,6 +29,7 @@ Versiones **verificadas en la máquina de desarrollo el 29 de sep 2026** mediant
 | Android SDK | **36.0.0** | `C:\Users\Henry\AppData\Local\Android\Sdk` (`ANDROID_HOME` no exportado; Flutter lo detecta vía Android Studio) |
 | Plataformas Android | `android-36.1`, `android-37.0` | platforms instaladas |
 | Build-tools | **36.0.0** | |
+| Android NDK | **28.2.13676358** (r28c) | instalado en Fase 1 con `sdkmanager ndk/28.2.13676358` (lo exige `flutter.ndkVersion` de Flutter 3.47); también está disponible el NDK 30.0.16248370 |
 | Android Emulator | **37.1.11.0** (build_id 15917651) | |
 | Visual Studio | **Community 2026 18.10.2** (18.10.12217.157) | `C:\Program Files\Microsoft Visual Studio\18\Community` |
 | Workload C++ (VC.Tools.x86.x64) | instalado | requerido para `flutter build windows` |
@@ -79,16 +80,16 @@ java -version          # JDK en PATH (el usado por Gradle es el JBR de Android S
 
 ---
 
-## 5. Verificaciones pendientes (Fase 1)
+## 5. Verificaciones de la Fase 1
 
-- [ ] `flutter create` genera proyecto con `android` y `windows`.
-- [ ] `flutter build apk --debug` completa sin errores.
-- [ ] `flutter build windows` completa sin errores.
-- [ ] `flutter analyze` y `flutter test` en verde.
-- [ ] Emulador Android arranca y despliega la app (o dispositivo físico).
-- [ ] `git init` con estructura de ramas (§7): `main`, `develop`, `feature/*`, `fix/*`, `refactor/*`, `release/*`.
-- [ ] Repositorio remoto (GitHub) y pipeline de CI (§8) — requieren decisión del propietario.
-- [ ] `CHANGELOG.md` y estrategia de versionado antes de cualquier release (§8 prohíbe releases automáticos sin estrategia de firma/versionado).
+- [x] `flutter create` genera proyecto con `android` y `windows` (org `com.raoon.readspark`, nombre `readspark`).
+- [x] `flutter build apk --debug` completa sin errores → `build\app\outputs\flutter-apk\app-debug.apk`.
+- [x] `flutter build windows` completa sin errores → `build\windows\x64\runner\Debug\readspark.exe`.
+- [x] `flutter analyze` (0 issues) y `flutter test` (3/3) en verde.
+- [ ] Emulador Android arranca y despliega la app (o dispositivo físico) — pendiente manual.
+- [x] `git init` con estructura de ramas (§7): `main`, `develop` (creadas); `feature/*`, `fix/*`, `refactor/*`, `release/*` al uso.
+- [x] Pipeline de CI (§8) creado en `.github/workflows/ci.yml` — **en reposo** hasta existir repositorio remoto (decisión: solo Git local).
+- [x] `CHANGELOG.md` inicial creado (semántica Keep a Changelog + CalVer pendiente de definir en Fase 10).
 
 ---
 
