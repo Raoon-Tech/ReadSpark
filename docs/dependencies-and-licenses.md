@@ -28,8 +28,8 @@ Cualquier versión no verificada → sello **`VERSION PENDIENTE DE VERIFICACIÓN
 | 9 | `markdown` | **7.3.1** | [github.com/dart-lang/markdown](https://github.com/dart-lang/markdown) | **BSD-3-Clause** ✅ [evidencia](https://pub.dev/packages/markdown/license) | Parser Markdown (dart-lang, oficial) | Todas (puro Dart) | Activo (equipo Dart) | ✅ Sí |
 | 10 | `archive` | `VERSION PENDIENTE DE VERIFICACIÓN` (última al instalar) | [github.com/brendan-duncan/archive](https://github.com/brendan-duncan/archive) | **MIT** ✅ [evidencia](https://pub.dev/packages/archive/license) | Descomprimir `.docx` (ZIP) | Todas (puro Dart) | Activo | ✅ Sí |
 | 11 | `xml` | `VERSION PENDIENTE DE VERIFICACIÓN` (última al instalar) | [github.com/google/xml.dart](https://github.com/google/xml.dart) | **MIT** ✅ [evidencia: "The MIT License" en pub.dev/packages/xml](https://pub.dev/packages/xml) | Parsear `word/document.xml` del DOCX | Todas (puro Dart) | Activo (Google) | ✅ Sí |
-| 12 | `file_picker` | `VERSION PENDIENTE DE VERIFICACIÓN` (12.x/13.x; arquitectura federada desde 12.0) | [github.com/miguelpruivo/flutter_file_picker](https://github.com/miguelpruivo/flutter_file_picker) | **MIT** ✅ [evidencia](https://pub.dev/packages/file_picker/license) (cambió de Apache-2.0 a MIT) | Selector nativo de archivos (importar documentos) | Android ✅, Windows ✅ | Activo | ✅ Sí |
-| 13 | `path_provider` | **2.1.6** | [pub.dev/packages/path_provider](https://pub.dev/packages/path_provider) | **BSD-3-Clause** ✅ [evidencia](https://pub.dev/packages/path_provider/license) | Directorios de datos/app en Android y Windows | Android ✅, Windows ✅ | Activo (Flutter team) | ✅ Sí |
+| 12 | `file_picker` | **13.1.0** (resuelta en `pubspec.lock`) | [github.com/miguelpruivo/flutter_file_picker](https://github.com/miguelpruivo/flutter_file_picker) | **MIT** ✅ [evidencia](https://pub.dev/packages/file_picker/license) (cambió de Apache-2.0 a MIT) | Selector nativo de archivos (importar documentos) | Android ✅, Windows ✅ | Activo | ✅ Sí |
+| 13 | `path_provider` | **2.1.6** (resuelta en `pubspec.lock`) | [pub.dev/packages/path_provider](https://pub.dev/packages/path_provider) | **BSD-3-Clause** ✅ [evidencia](https://pub.dev/packages/path_provider/license) | Directorios de datos/app en Android y Windows | Android ✅, Windows ✅ | Activo (Flutter team) | ✅ Sí |
 
 **Criterio de inclusión:** todas las entradas con licencia verificada pertenecen a la allowlist (MIT / BSD-3-Clause / Apache-2.0). Las entradas con sello `VERSION PENDIENTE DE VERIFICACIÓN` se confirmarán en `pubspec.lock` al instalarlas (Fase 3+).
 
@@ -57,6 +57,18 @@ Licencias verificadas leyendo el archivo `LICENSE` de la caché local de pub (`%
 | `sqlparser` | **0.45.0** | transitiva | **MIT** ✅ (LICENSE en caché) | Parser SQL usado por `drift_dev` |
 
 Verificación automatizada en CI: el paso *Dependency license check* de `.github/workflows/ci.yml` recorre `pubspec.lock` y falla si algún paquete alojado contiene licencias GPL/LGPL/MPL fuera de la allowlist.
+
+### 1.3 Dependencias instaladas en la Fase 3 (resueltas en `pubspec.lock`)
+
+Licencias verificadas leyendo el archivo `LICENSE` de la caché local de pub (`%LOCALAPPDATA%\Pub\Cache\hosted\pub.dev`, 29-sep-2026):
+
+| Nombre | Versión resuelta | Tipo | Licencia (evidencia local) | Uso |
+|---|---|---|---|---|
+| `file_picker` | **13.1.0** | directa | **MIT** ✅ (LICENSE en caché: "MIT License") | Selector nativo de archivos para importar (RF-01) |
+| `path_provider` | **2.1.6** | directa | **BSD-3-Clause** ✅ (LICENSE en caché: "Copyright 2013 The Flutter Authors") | Carpeta de almacenamiento de la app (copias + BD) |
+| `path` | **1.9.1** | directa | **BSD-3-Clause** ✅ (LICENSE en caché: "Copyright 2014, the Dart project authors") | Manipulación segura de rutas (anti path-traversal, RF-72) |
+| `windows_file_picker` | **2.0.0** | transitiva | **MIT** ✅ (LICENSE en caché) | Implementación Windows de `file_picker` |
+| `xml` | **7.0.1** | transitiva | **MIT** ✅ (LICENSE en caché: "The MIT License") | Se resolvió al instalar `file_picker`; usada en Fase 4 (DOCX) |
 
 ---
 
