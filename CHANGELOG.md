@@ -14,3 +14,5 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-1.1.0/) y el v
 - `ReadSparkApp` con Riverpod (`ProviderScope`) y placeholder de biblioteca.
 - Configuración de lint (`flutter_lints` 6.0.0), formatter y primeros tests (smoke + unit).
 - Pipeline de CI en reposo (`.github/workflows/ci.yml`): analyze, test y verificación de licencias.
+- Persistencia SQLite con Drift 2.35.0 (Fase 2): esquema v1 (7 tablas + 6 índices), 5 DAOs y repositorios de `domain` sobre `AppDatabase` con `PRAGMA foreign_keys = ON`.
+- Tests de base de datos en memoria (28 en total): CRUD de documentos, contenido (secciones/párrafos), upsert de progreso 1 fila/documento, cascadas, settings, bookmarks y caché de voces.
