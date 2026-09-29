@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:readspark/core/constants/app_constants.dart';
+import 'package:readspark/presentation/library/library_screen.dart';
 
-/// Root widget of ReadSpark. All providers are composed in [ProviderScope]
+/// Root widget of ReadSpark. All providers are composed in `providers.dart`
 /// (see `lib/main.dart`), keeping business logic out of the UI layer.
 class ReadSparkApp extends ConsumerWidget {
   const ReadSparkApp({super.key});
@@ -24,20 +25,7 @@ class ReadSparkApp extends ConsumerWidget {
         ),
         useMaterial3: true,
       ),
-      home: const _LibraryPlaceholder(),
-    );
-  }
-}
-
-/// Temporary placeholder for the library screen (real implementation in Phase 3).
-class _LibraryPlaceholder extends StatelessWidget {
-  const _LibraryPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text(AppConstants.appName)),
-      body: const Center(child: Text('Biblioteca')),
+      home: const LibraryScreen(),
     );
   }
 }
