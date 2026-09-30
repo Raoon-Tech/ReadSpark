@@ -168,7 +168,7 @@ Debe funcionar en **Android** y **Windows**.
 Fase 1: flutter analyze OK · flutter test OK · build Android OK · build Windows OK ✅
 Fase 2: CRUD de documentos sin UI definitiva ✅
 Fase 3: biblioteca 100% offline ✅
-Fase 4: el lector recibe DocumentModel independiente del formato
+Fase 4: el lector recibe DocumentModel independiente del formato ✅
 Fase 5: lectura sin TTS
 Fase 6: escuchar documento completo con control de reproducción
 Fase 7: abrir → leer → cerrar → reabrir → continuar exactamente

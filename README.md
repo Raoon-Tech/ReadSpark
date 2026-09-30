@@ -81,7 +81,7 @@ Detalle de las capas en [`docs/architecture.md`](docs/architecture.md).
 | Fase 1 | Infraestructura (proyecto Flutter, Git, CI, lint, tests, builds) | **Completada** |
 | Fase 2 | Persistencia (SQLite, Drift, migraciones, repositorios) | **Completada** |
 | Fase 3 | Biblioteca (importar, listar, buscar, favoritos) | **Completada** |
-| Fase 4 | Motor documental (PDF, DOCX, MD, TXT) | Pendiente |
+| Fase 4 | Motor documental (PDF, DOCX, MD, TXT) | **Completada** |
 | Fase 5 | Lector visual | Pendiente |
 | Fase 6 | TTS | Pendiente |
 | Fase 7 | Progreso de lectura | Pendiente |

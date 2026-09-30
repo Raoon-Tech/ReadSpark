@@ -97,6 +97,7 @@ java -version          # JDK en PATH (el usado por Gradle es el JBR de Android S
 
 - [x] **Fase 2** (rama `feature/phase-2-persistence`, fusionada al `develop` vía PR #1): `flutter analyze` 0 issues · `flutter test` 28/28 · APK y EXE construidos. `sqlite3_flutter_libs` descartado (los binarios ya vienen en `sqlite3` 3.5.2).
 - [x] **Fase 3** (rama `feature/phase-3-library`): `flutter analyze` 0 issues · `flutter test` 52/52 · APK y EXE construidos. Nuevas deps verificadas: `file_picker` 13.1.0 (MIT), `path_provider` 2.1.6 y `path` 1.9.1 (BSD-3).
+- [x] **Fase 4** (rama `feature/phase-4-document-engine`): `flutter analyze` 0 issues · `flutter test` 85/85 · APK y EXE construidos. Nuevas deps verificadas: `pdfrx` 2.6.5, `archive` 4.3.0, `xml` 7.1.0 (MIT) y `markdown` 7.3.1 (BSD-3); motor PDFium nativo incluido en ambos builds.
 - [ ] Verificación manual en emulador/dispositivo — pendiente (compartida con la Fase 1, sin emulador disponible en el entorno).
 
 ---

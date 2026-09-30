@@ -143,26 +143,30 @@ Clave-valor (ver `database.md`): `tts_voice_id`, `tts_language`, `tts_rate`, `tt
 ### Registro de importadores (ADR-007)
 
 ```dart
-abstract class DocumentImporter {
+abstract interface class DocumentImporter {
   bool supports(String extension);
-  Future<ImportedDocument> importDocument(File file);
+  Future<ImportedDocument> importDocument(File file, Document base);
 }
 ```
 
-`ImporterRegistry` resuelve por extensión en minúsculas (`.pdf`, `.docx`, `.md`, `.markdown`, `.txt`). Sin `if/else` encadenados. Fase 11: `EpubImporter`, `HtmlImporter`, `OdtImporter` se registran sin tocar el lector.
+- `base` es el `Document` que crea el caso de uso (id, título, ruta, fechas); el importador devuelve el agregado enriquecido (`copyWith` con autor, páginas, `totalCharacters` calculado y `textExtractable`).
+- `ImporterRegistry` (`domain/documents/importers`) resuelve por extensión en minúsculas (`.pdf`, `.docx`, `.md`, `.markdown`, `.txt`). Sin `if/else` encadenados. Fase 11: `EpubImporter`, `HtmlImporter`, `OdtImporter` se registran sin tocar el lector.
+- Los importadores construyen secciones/párrafos con `ParsedContentBuilder` (`data/parsers`): ids únicos por documento, sección raíz automática y conteo de caracteres.
+- `ImportedDocument` lleva `DocumentContent` + `ImportWarning?` (`scannedPdf`): avisos no bloqueantes que la UI muestra después del éxito (RF-73).
 
-Seguridad de importación (§25): validar extensión permitida, ruta normalizada (sin path traversal), límite de tamaño, captura de excepciones de parser → `ParserException` con código técnico + mensaje amigable.
+Seguridad de importación (§25): validar extensión permitida, ruta normalizada (sin path traversal), límite de tamaño (**100 MB**, `AppConstants.maxImportSizeBytes`; comprobado antes y después de copiar), y captura de excepciones de parser → `ParserException` con código técnico + mensaje amigable. Ante cualquier fallo la copia gestionada se elimina y no queda registro en la biblioteca.
 
 ### PDF (`PdfImporter`) — §14
 
-- Motor: `pdfrx` / `pdfrx_engine` (PDFium), extracción con `PdfPage.loadText` por página.
-- Produce: `Document` (con `totalPages`), una `DocumentSection` por capítulo si se detecta, párrafos con `pageNumber` real.
-- **Detección de PDF escaneado (C7):** si la extracción retorna ~0 caracteres en la mayoría de páginas → `textExtractable = false`, mensaje UI: *"Este PDF parece estar escaneado. Requiere OCR (disponible en versiones futuras)."* El documento se importa igualmente con secciones/párrafos vacíos para no perder el registro en biblioteca. **Sin OCR en el MVP** (Fase 11).
+- Motor: `pdfrx` / `pdfrx_engine` (PDFium), extracción con `PdfPage.loadText` por página; `pdfrxFlutterInitialize()` idempotente antes de abrir.
+- Produce: `Document` (con `totalPages`), una `DocumentSection` por capítulo del **outline/bookmarks** (`loadOutline`, niveles 1..6; sin outline → sección raíz única), párrafos con `pageNumber` real (1-based).
+- La conversión pura vive en `buildPdfContent` (`pdf_structure_builder.dart`), sin tipos de pdfrx → unit-testable: reparto de párrafos por página, partición en bloques, unión de líneas cortadas por guion.
+- **Detección de PDF escaneado (C7):** página "con texto" = ≥10 caracteres extraíbles; si **la mayoría de páginas** no tiene texto → `textExtractable = false` + `ImportWarning.scannedPdf`, mensaje UI: *"Este PDF parece estar escaneado. Requiere OCR (disponible en versiones futuras)."* El documento se importa igualmente con secciones/párrafos vacíos para no perder el registro en biblioteca. **Sin OCR en el MVP** (Fase 11).
 
 ### DOCX (`DocxImporter`) — §15
 
-- Descomprimir con `archive` → leer `word/document.xml` (+ `styles.xml` para mapear estilos → niveles).
-- Extraer: títulos/subtítulos (estilos Heading1..N → `level`), párrafos, listas (numbering → prefijo de lista en el texto o párrafo de item), texto, orden de lectura (secuencia del documento).
+- Descomprimir con `archive` → leer `word/document.xml` (+ `docProps/core.xml` para autor).
+- Extraer: títulos/subtítulos (preferentemente `w:outlineLvl`, fallback estilos `Heading1..N` → `level`), párrafos, listas (`w:numPr` → prefijo `• ` en el texto), filas de tabla (una celda-párrafo por celda), texto, orden de lectura (secuencia del documento).
 - Objetivo: **estructura semántica para lectura**, no réplica visual del DOCX.
 - Sin páginas estables → `pageNumber = null` (por eso el progreso no depende de páginas).
 

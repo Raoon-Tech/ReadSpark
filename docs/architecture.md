@@ -107,23 +107,27 @@ TtsService
 
 La aplicación (dominio/UI) nunca llama a APIs del sistema operativo directamente. Si `setVoice` no está soportado en una plataforma (riesgo ADR-008), el adaptador de esa plataforma implementa el comportamiento equivalente (p. ej. por locale) sin que el dominio se entere.
 
-### 4.2 Importadores — en `data/parsers`
+### 4.2 Importadores — interfaz en `domain`, implementación en `data/parsers`
 
 ```dart
-abstract class DocumentImporter {
+abstract interface class DocumentImporter {
   bool supports(String extension);
-  Future<ImportedDocument> importDocument(File file);
+  Future<ImportedDocument> importDocument(File file, Document base);
 }
 ```
+
+- La interfaz, `ImportedDocument`/`ImportWarning` y `ImporterRegistry` viven en `domain/documents/importers` (el dominio no conoce pdfrx/archive/markdown).
+- Los cuatro importadores concretos viven en `data/parsers/{pdf,docx,markdown,txt}` y se registran en el punto de composición (`presentation/app/providers.dart`).
+- El caso de uso `ImportDocument` recibe el registro, parsea la copia guardada y persiste con `saveContent` atómico; los fallos eliminan la copia y relanzan `ParserException`.
 
 Registro de importadores (ADR-007), sin condicionales gigantes:
 
 ```text
-ImporterRegistry
-   ├── PdfImporter      (pdfrx/PDFium)
-   ├── DocxImporter     (archive + xml)
-   ├── MarkdownImporter (package:markdown)
-   └── TxtImporter      (Dart stdlib)
+ImporterRegistry            (domain/documents/importers)
+   ├── PdfImporter      (pdfrx/PDFium)        data/parsers/pdf
+   ├── DocxImporter     (archive + xml)        data/parsers/docx
+   ├── MarkdownImporter (package:markdown)     data/parsers/markdown
+   └── TxtImporter      (Dart stdlib)          data/parsers/txt
 
 Posteriormente (Fase 11): EpubImporter, HtmlImporter, OdtImporter
 ```
