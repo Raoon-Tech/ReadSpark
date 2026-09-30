@@ -22,3 +22,8 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-1.1.0/) y el v
 - Detección de PDF escaneado (C7): si la mayoría de páginas no tiene texto extraíble el documento se importa con `textExtractable=false` y la UI muestra el aviso de OCR futuro, sin bloquear la importación.
 - Flujo de importación completo: parseo → `saveContent` atómico (documento + secciones + párrafos), límite de tamaño de 100 MB (§25), limpieza de la copia ante cualquier fallo y spinner en el FAB sin bloquear la UI (RNF-01).
 - Tests del motor documental (85 en total): registro de importadores, parsers md/txt/docx, constructor puro de PDF (outline, páginas, C7), caso de uso de importación y avisos en la UI.
+- Lector visual (Fase 5, RF-10..RF-13): `ReaderScreen` renderiza el `DocumentModel` común sin importar el formato original, con navegación por secciones (flechas ◀/▶, selector con lista y teclado ←/→ para Windows §24), posición de sección seguida durante el scroll y salto a página por número en PDF.
+- Búsqueda interna (RF-12) con contador `n/m`, resaltado de coincidencias y salto a cada párrafo; lógica pura en `presentation/reader/reader_search.dart`.
+- Ajustes persistentes desde el lector (RF-13): tamaño de texto 0.8×–2.0× (A−/A+) y tema system/claro/oscuro, guardados vía `SettingsRepository.setAll` e inmediatamente observables (Riverpod).
+- Vista de PDF escaneado sin texto (C7) y vista de error para documentos sin contenido, dentro de `ReaderScreen`.
+- Tests del lector (96 en total): búsqueda pura y widget de render, navegación por flechas/teclado, búsqueda, persistencia de tamaño/tema y estados vacío/error.

@@ -199,6 +199,8 @@ Responsabilidades:
 
 Los **chunks son de runtime, no se persisten** (ADR-003): la unidad de guardado es el párrafo + offset de carácter, estable entre renderizadores y tamaños de pantalla.
 
+> **Estado actual**: `presentation/reader/reader_screen.dart` (Fase 5) ya renderiza `DocumentModel` con navegación, búsqueda y ajustes visuales **sin ReaderEngine**; este llega en las Fases 6–7 para TTS y progreso. El lector consume directamente `DocumentRepository.getContent`, de modo que sustituirlo por el engine no toca los importadores.
+
 ---
 
 ## 7. Segmentación TTS (§20)
