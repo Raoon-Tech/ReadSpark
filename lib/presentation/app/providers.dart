@@ -15,12 +15,15 @@ import 'package:readspark/data/parsers/pdf/pdf_importer.dart';
 import 'package:readspark/data/parsers/txt/txt_importer.dart';
 import 'package:readspark/data/repositories/document_repository_impl.dart';
 import 'package:readspark/data/repositories/library_repository_impl.dart';
+import 'package:readspark/data/repositories/settings_repository_impl.dart';
 import 'package:readspark/domain/documents/importers/importer_registry.dart';
 import 'package:readspark/domain/documents/repositories/document_file_port.dart';
 import 'package:readspark/domain/documents/repositories/document_repository.dart';
 import 'package:readspark/domain/documents/use_cases/delete_document.dart';
 import 'package:readspark/domain/documents/use_cases/import_document.dart';
 import 'package:readspark/domain/library/repositories/library_repository.dart';
+import 'package:readspark/domain/settings/entities/app_settings.dart';
+import 'package:readspark/domain/settings/repositories/settings_repository.dart';
 
 final appDatabaseFileProvider = Provider<File>(
   (ref) => throw UnimplementedError(
@@ -44,6 +47,16 @@ final documentRepositoryProvider = Provider<DocumentRepository>(
 
 final libraryRepositoryProvider = Provider<LibraryRepository>(
   (ref) => LibraryRepositoryImpl(ref.watch(appDatabaseProvider)),
+);
+
+final settingsRepositoryProvider = Provider<SettingsRepository>(
+  (ref) => SettingsRepositoryImpl(ref.watch(appDatabaseProvider)),
+);
+
+/// Typed user settings (theme, font scale, TTS options). Invalidate after
+/// every save so dependents (MaterialApp theme, reader) refresh.
+final appSettingsProvider = FutureProvider<AppSettings>(
+  (ref) => ref.watch(settingsRepositoryProvider).load(),
 );
 
 final importerRegistryProvider = Provider<ImporterRegistry>(

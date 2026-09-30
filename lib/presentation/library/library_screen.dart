@@ -10,7 +10,7 @@ import 'package:readspark/presentation/app/providers.dart';
 import 'package:readspark/presentation/library/library_filter.dart';
 import 'package:readspark/presentation/library/library_providers.dart';
 import 'package:readspark/presentation/library/widgets/document_tile.dart';
-import 'package:readspark/presentation/reader/reader_placeholder_screen.dart';
+import 'package:readspark/presentation/reader/reader_screen.dart';
 
 /// Main screen: import, browse, search, sort and delete documents —
 /// fully offline (CU-01, CU-02, RF-01..RF-07, "Fase 3: biblioteca 100%").
@@ -117,7 +117,8 @@ class LibraryScreen extends ConsumerWidget {
     if (!context.mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => ReaderPlaceholderScreen(
+        builder: (context) => ReaderScreen(
+          documentId: item.document.id,
           documentTitle: item.document.title,
         ),
       ),
