@@ -10,6 +10,8 @@ import 'package:readspark/domain/documents/repositories/document_repository.dart
 import 'package:readspark/domain/documents/use_cases/import_document.dart';
 import 'package:readspark/domain/library/entities/library_item.dart';
 import 'package:readspark/domain/library/repositories/library_repository.dart';
+import 'package:readspark/domain/settings/entities/app_settings.dart';
+import 'package:readspark/domain/settings/repositories/settings_repository.dart';
 
 /// Builds a [Document] with sensible defaults for tests.
 Document buildTestDocument(
@@ -214,4 +216,85 @@ class FakeImportDocument implements ImportDocument {
     if (nextParserError != null) throw nextParserError!;
     return nextResult;
   }
+}
+
+/// In-memory [SettingsRepository]; [rawSaves] records every `setAll` write
+/// so tests can assert that font scale / theme changes are persisted (RF-13).
+class FakeSettingsRepository implements SettingsRepository {
+  final Map<String, String> values = {};
+  final List<Map<String, String>> rawSaves = [];
+
+  @override
+  Future<AppSettings> load() async => AppSettings.fromKeyValue(values);
+
+  @override
+  Future<void> save(AppSettings settings) async {
+    values
+      ..clear()
+      ..addAll(settings.toKeyValue());
+  }
+
+  @override
+  Future<Map<String, String>> getAll() async => Map.of(values);
+
+  @override
+  Future<void> setAll(Map<String, String> entries) async {
+    rawSaves.add(Map.of(entries));
+    values.addAll(entries);
+  }
+}
+
+/// Builds a multi-section [DocumentContent] for reader tests:
+/// sections `Section A`/`Section B` with paragraphs (B holds `'busca X'`).
+DocumentContent buildReaderContent(String documentId) {
+  final sectionA = DocumentSection(
+    id: 'sec_${documentId}_0',
+    documentId: documentId,
+    title: 'Section A',
+    order: 0,
+    level: 0,
+  );
+  final sectionB = DocumentSection(
+    id: 'sec_${documentId}_1',
+    documentId: documentId,
+    title: 'Section B',
+    order: 1,
+    level: 0,
+  );
+  final paragraphs = <DocumentParagraph>[
+    DocumentParagraph(
+      id: 'par_${documentId}_0',
+      documentId: documentId,
+      sectionId: sectionA.id,
+      order: 0,
+      text: 'First paragraph of A',
+    ),
+    DocumentParagraph(
+      id: 'par_${documentId}_1',
+      documentId: documentId,
+      sectionId: sectionB.id,
+      order: 1,
+      text: 'Second paragraph where algo busca algo',
+      pageNumber: 2,
+    ),
+    DocumentParagraph(
+      id: 'par_${documentId}_2',
+      documentId: documentId,
+      sectionId: sectionB.id,
+      order: 2,
+      text: 'Third paragraph on page 3',
+      pageNumber: 3,
+    ),
+  ];
+  return DocumentContent(
+    document: buildTestDocument(documentId, title: 'Reader doc').copyWith(
+      totalCharacters: paragraphs.fold<int>(
+        0,
+        (sum, paragraph) => sum + paragraph.text.length,
+      ),
+      totalPages: 4,
+    ),
+    sections: [sectionA, sectionB],
+    paragraphs: paragraphs,
+  );
 }
