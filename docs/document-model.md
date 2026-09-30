@@ -115,12 +115,22 @@ La selección del usuario (`tts_voice_id`, `tts_language`, `tts_rate`, `tts_pitc
 
 ### LibraryItem (read-model, ADR-005)
 
-No es tabla: proyección `Document + ReadingProgress` para la UI de biblioteca:
+No es tabla: proyección `Document + ReadingProgress` para la UI de biblioteca,
+generada por `LibraryRepositoryImpl` con un `Stream` de
+`documents LEFT JOIN reading_progress` (1 fila por documento):
 
 ```text
-LibraryItem = { document, percentage, lastReadAt, isFavorite, status }
-status: nuevo | en curso | completado
+LibraryItem = { document, percentage, lastReadAt, hasProgress }
+percentage:  0.0..1.0  (0 si nunca se leyó)
+lastReadAt:  DateTime? (null sin fila de progreso)
+hasProgress: lastReadAt != null
 ```
+
+`isFavorite` vive en `document` (columna `documents.is_favorite`, ADR-005);
+los estados "nuevo / en curso / completado" se derivan en la UI a partir de
+`hasProgress` y `percentage`. La lógica de secciones (Continuar leyendo /
+Recientes / Favoritos / Todos) y búsqueda es pura: `applyLibraryView()` en
+`presentation/library/library_filter.dart`.
 
 ### AppSettings
 

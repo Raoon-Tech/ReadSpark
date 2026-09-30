@@ -166,4 +166,5 @@ upsert de progreso: 1 fila por documento                        ✅ (tests)
 cascadas ON DELETE al eliminar documento                        ✅ (tests)
 índices presentes según §11                                    ✅ (generados)
 migración v1 → v2 sin pérdida de datos                          ⏳ pendiente (aún no hay v2)
+watch de biblioteca (LEFT JOIN con progreso, ADR-005)            ✅ (tests, Fase 3)
 ```

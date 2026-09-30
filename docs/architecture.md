@@ -51,7 +51,7 @@ Reglas:
 1. `domain` no importa `package:flutter/*`, ni plugins de plataforma, ni `data`, ni `presentation`.
 2. `presentation` depende de `domain` (interfaces y casos de uso), nunca de implementaciones concretas de `data`.
 3. `data` depende de `domain` (para implementar sus interfaces) y de `core`.
-4. La composición (inyección de dependencias) ocurre en un único punto de arranque (`presentation/app`).
+4. La composición (inyección de dependencias) ocurre en un único punto de arranque (`presentation/app`: `bootstrap.dart` + `providers.dart`); los tests inyectan fakes con overrides del mismo `ProviderScope`.
 5. `core` no conoce reglas de negocio; solo constantes, errores tipados, logging, extensiones y utilidades.
 
 Con esto se cumple §3.2 (desacople), §36 Mantenibilidad (añadir formato = nuevo importer, sin tocar el lector) y §36 Extensibilidad (nueva implementación TTS sin tocar el dominio).
