@@ -16,3 +16,5 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-1.1.0/) y el v
 - Pipeline de CI en reposo (`.github/workflows/ci.yml`): analyze, test y verificación de licencias.
 - Persistencia SQLite con Drift 2.35.0 (Fase 2): esquema v1 (7 tablas + 6 índices), 5 DAOs y repositorios de `domain` sobre `AppDatabase` con `PRAGMA foreign_keys = ON`.
 - Tests de base de datos en memoria (28 en total): CRUD de documentos, contenido (secciones/párrafos), upsert de progreso 1 fila/documento, cascadas, settings, bookmarks y caché de voces.
+- Biblioteca 100% offline (Fase 3): importación con `file_picker` (copia gestionada + registro de metadatos), listado reactivo (`documents LEFT JOIN reading_progress`), secciones Continuar leyendo / Recientes / Favoritos / Todos, búsqueda por título, favoritos, eliminar con confirmación y pantalla de lector provisional.
+- Casos de uso `ImportDocument` / `DeleteDocument`, puerto `DocumentFilePort` y proyección `LibraryItem` (ADR-005) con tests unitarios y widget (52 tests en total).
