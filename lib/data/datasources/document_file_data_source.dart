@@ -43,6 +43,14 @@ class DocumentFileDataSource implements DocumentFilePort {
         'Formato no soportado. Usa PDF, DOCX, Markdown o TXT.',
       );
     }
+    final sourceSize = await _lengthOf(file);
+    if (sourceSize != null && sourceSize > AppConstants.maxImportSizeBytes) {
+      throw ImportException(
+        ImportErrorCode.fileTooLarge,
+        'El archivo supera el límite de '
+        '${AppConstants.maxImportSizeBytes ~/ (1024 * 1024)} MB.',
+      );
+    }
     if (!File(sourcePath).existsSync()) {
       throw const ImportException(
         ImportErrorCode.readFailed,
@@ -83,6 +91,16 @@ class DocumentFileDataSource implements DocumentFilePort {
     final file = File(normalized);
     if (await file.exists()) {
       await file.delete();
+    }
+  }
+
+  /// Best-effort source size for the pre-copy limit check (§25); `null`
+  /// when the platform cannot report it without reading the file.
+  Future<int?> _lengthOf(PlatformFile file) async {
+    try {
+      return await file.xFile.length();
+    } catch (_) {
+      return null;
     }
   }
 
