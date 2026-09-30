@@ -12,4 +12,8 @@ abstract final class AppConstants {
     '.markdown',
     '.txt',
   ];
+
+  /// Maximum accepted size for an import (§25 "límite de tamaño"; the plan
+  /// does not specify a value, 100 MB is the project decision, RNF-06).
+  static const int maxImportSizeBytes = 100 * 1024 * 1024;
 }
