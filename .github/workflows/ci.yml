@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    name: Analyze, test & dependency licenses
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Dependency license check
+        run: |
+          set -euo pipefail
+          PUB_CACHE="${PUB_CACHE:-$HOME/.pub-cache}"
+          FAIL=0
+          # Resolve package -> version from pubspec.lock and inspect LICENSE files
+          # for licenses outside the project allowlist (MIT, Apache, BSD, ISC).
+          pkgs=$(awk '
+            /^  [a-z_0-9]+:$/ { name=$1; sub(":","",name) }
+            /source: "hosted"/ { hosted=1 }
+            /^    version:/ { if (hosted) { ver=$2; gsub(/"/,"",ver); print name "-" ver }; hosted=0 }
+          ' pubspec.lock)
+          for p in $pkgs; do
+            lic=$(ls -d "$PUB_CACHE/hosted/pub.dev/$p"/LICENSE 2>/dev/null || true)
+            if [ -z "$lic" ]; then
+              echo "::warning::LICENSE not found for $p — verify manually (docs/dependencies-and-licenses.md)"
+              continue
+            fi
+            if grep -qiE "GNU (AFFERO )?GENERAL PUBLIC LICENSE|GNU LESSER GENERAL PUBLIC LICENSE|Mozilla Public License" "$lic"; then
+              echo "::error::License outside allowlist detected in $p"
+              FAIL=1
+            fi
+          done
+          exit $FAIL
+
+  build-android:
+    name: Build Android (debug)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter build apk --debug
+
+  build-windows:
+    name: Build Windows (debug)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: quality
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.5
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter build windows --debug

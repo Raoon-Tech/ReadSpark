@@ -1,0 +1,5 @@
+package com.raoon.readspark.readspark
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()

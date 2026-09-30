@@ -138,7 +138,7 @@ CREATE TABLE settings (
 4. Verificar que los datos existentes sobreviven (sesión de upgrade)
 ```
 
-- Estado actual: **esquema v1** (este documento). No existen datos en producción hasta la Fase 2.
+- Estado actual: **esquema v1** implementado y testeado (Fase 2). Aún no hay datos en producción.
 
 ---
 
@@ -146,22 +146,24 @@ CREATE TABLE settings (
 
 ```text
 lib/data/database/
-├── tables/            # definiciones Drift (documents, sections, paragraphs, ...)
-├── database.dart      # AppDatabase (schemaVersion, migrations)
-├── daos/              # DocumentDao, ProgressDao, BookmarkDao, SettingsDao, VoiceDao
-└── connection.dart    # NativeDatabase (Android/Windows), aislamiento de UI
+├── tables.dart         # definiciones Drift (Documents, DocumentSections, DocumentParagraphs, ...)
+├── database.dart       # AppDatabase (schemaVersion, migrations, conexión nativa)
+├── database.g.dart     # generado por drift_dev — no editar a mano
+└── daos/               # DocumentDao, ProgressDao, BookmarkDao, SettingsDao, VoiceDao
+lib/data/repositories/  # implementaciones de los repositorios de `domain`
 ```
 
-- Consultas pesadas y escrituras fuera del hilo de UI (isolate de Drift cuando aplique, §26).
-- El acceso desde la UI es **solo** vía repositorios de `domain` implementados en `data/repositories`.
+- `AppDatabase.open(File)` para runtime; `AppDatabase.inMemory()` para tests.
+- La UI accede **solo** vía repositorios de `domain` implementados en `data/repositories`.
 
 ---
 
 ## 5. Criterios de aceptación (Fase 2)
 
 ```text
-crear documento → guardar → consultar → actualizar → eliminar   ✅
-upsert de progreso conserva el registro anterior               ✅
-migración v1 → v2 sin pérdida de datos                        ✅
-índices presentes según §11                                   ✅
+crear documento → guardar → consultar → actualizar → eliminar   ✅ (tests)
+upsert de progreso: 1 fila por documento                        ✅ (tests)
+cascadas ON DELETE al eliminar documento                        ✅ (tests)
+índices presentes según §11                                    ✅ (generados)
+migración v1 → v2 sin pérdida de datos                          ⏳ pendiente (aún no hay v2)
 ```
