@@ -51,7 +51,7 @@ Reglas:
 1. `domain` no importa `package:flutter/*`, ni plugins de plataforma, ni `data`, ni `presentation`.
 2. `presentation` depende de `domain` (interfaces y casos de uso), nunca de implementaciones concretas de `data`.
 3. `data` depende de `domain` (para implementar sus interfaces) y de `core`.
-4. La composición (inyección de dependencias) ocurre en un único punto de arranque (`presentation/app`).
+4. La composición (inyección de dependencias) ocurre en un único punto de arranque (`presentation/app`: `bootstrap.dart` + `providers.dart`); los tests inyectan fakes con overrides del mismo `ProviderScope`.
 5. `core` no conoce reglas de negocio; solo constantes, errores tipados, logging, extensiones y utilidades.
 
 Con esto se cumple §3.2 (desacople), §36 Mantenibilidad (añadir formato = nuevo importer, sin tocar el lector) y §36 Extensibilidad (nueva implementación TTS sin tocar el dominio).
@@ -107,23 +107,27 @@ TtsService
 
 La aplicación (dominio/UI) nunca llama a APIs del sistema operativo directamente. Si `setVoice` no está soportado en una plataforma (riesgo ADR-008), el adaptador de esa plataforma implementa el comportamiento equivalente (p. ej. por locale) sin que el dominio se entere.
 
-### 4.2 Importadores — en `data/parsers`
+### 4.2 Importadores — interfaz en `domain`, implementación en `data/parsers`
 
 ```dart
-abstract class DocumentImporter {
+abstract interface class DocumentImporter {
   bool supports(String extension);
-  Future<ImportedDocument> importDocument(File file);
+  Future<ImportedDocument> importDocument(File file, Document base);
 }
 ```
+
+- La interfaz, `ImportedDocument`/`ImportWarning` y `ImporterRegistry` viven en `domain/documents/importers` (el dominio no conoce pdfrx/archive/markdown).
+- Los cuatro importadores concretos viven en `data/parsers/{pdf,docx,markdown,txt}` y se registran en el punto de composición (`presentation/app/providers.dart`).
+- El caso de uso `ImportDocument` recibe el registro, parsea la copia guardada y persiste con `saveContent` atómico; los fallos eliminan la copia y relanzan `ParserException`.
 
 Registro de importadores (ADR-007), sin condicionales gigantes:
 
 ```text
-ImporterRegistry
-   ├── PdfImporter      (pdfrx/PDFium)
-   ├── DocxImporter     (archive + xml)
-   ├── MarkdownImporter (package:markdown)
-   └── TxtImporter      (Dart stdlib)
+ImporterRegistry            (domain/documents/importers)
+   ├── PdfImporter      (pdfrx/PDFium)        data/parsers/pdf
+   ├── DocxImporter     (archive + xml)        data/parsers/docx
+   ├── MarkdownImporter (package:markdown)     data/parsers/markdown
+   └── TxtImporter      (Dart stdlib)          data/parsers/txt
 
 Posteriormente (Fase 11): EpubImporter, HtmlImporter, OdtImporter
 ```

@@ -5,7 +5,8 @@ enum ImportErrorCode {
   pickFailed('pick_failed'),
   readFailed('read_failed'),
   copyFailed('copy_failed'),
-  invalidPath('invalid_path');
+  invalidPath('invalid_path'),
+  fileTooLarge('file_too_large');
 
   const ImportErrorCode(this.code);
 

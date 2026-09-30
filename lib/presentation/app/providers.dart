@@ -9,8 +9,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:readspark/data/database/database.dart';
 import 'package:readspark/data/datasources/document_file_data_source.dart';
+import 'package:readspark/data/parsers/docx/docx_importer.dart';
+import 'package:readspark/data/parsers/markdown/markdown_importer.dart';
+import 'package:readspark/data/parsers/pdf/pdf_importer.dart';
+import 'package:readspark/data/parsers/txt/txt_importer.dart';
 import 'package:readspark/data/repositories/document_repository_impl.dart';
 import 'package:readspark/data/repositories/library_repository_impl.dart';
+import 'package:readspark/domain/documents/importers/importer_registry.dart';
 import 'package:readspark/domain/documents/repositories/document_file_port.dart';
 import 'package:readspark/domain/documents/repositories/document_repository.dart';
 import 'package:readspark/domain/documents/use_cases/delete_document.dart';
@@ -41,10 +46,20 @@ final libraryRepositoryProvider = Provider<LibraryRepository>(
   (ref) => LibraryRepositoryImpl(ref.watch(appDatabaseProvider)),
 );
 
+final importerRegistryProvider = Provider<ImporterRegistry>(
+  (ref) => ImporterRegistry(const [
+    PdfImporter(),
+    DocxImporter(),
+    MarkdownImporter(),
+    TxtImporter(),
+  ]),
+);
+
 final importDocumentProvider = Provider<ImportDocument>(
   (ref) => ImportDocument(
     ref.watch(documentFilePortProvider),
     ref.watch(documentRepositoryProvider),
+    ref.watch(importerRegistryProvider),
   ),
 );
 

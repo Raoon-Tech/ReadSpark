@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:readspark/core/errors/import_exception.dart';
+import 'package:readspark/core/errors/parser_exception.dart';
+import 'package:readspark/domain/documents/importers/document_importer.dart';
+import 'package:readspark/domain/documents/use_cases/import_document.dart';
 import 'package:readspark/domain/library/entities/library_item.dart';
 import 'package:readspark/presentation/app/providers.dart';
 import 'package:readspark/presentation/library/library_filter.dart';
@@ -21,11 +24,7 @@ class LibraryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Biblioteca')),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Importar documento',
-        onPressed: () => _importDocument(context, ref),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: const _ImportFab(),
       body: Column(
         children: [
           Padding(
@@ -107,27 +106,6 @@ class LibraryScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _importDocument(BuildContext context, WidgetRef ref) async {
-    try {
-      final document = await ref.read(importDocumentProvider)();
-      if (document == null || !context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('«${document.title}» añadido a la biblioteca')),
-      );
-    } on ImportException catch (exception) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(exception.message)));
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo importar el documento. Inténtalo de nuevo.'),
-        ),
-      );
-    }
-  }
-
   Future<void> _open(
     BuildContext context,
     WidgetRef ref,
@@ -190,6 +168,71 @@ class LibraryScreen extends ConsumerWidget {
         ),
       );
     }
+  }
+}
+
+/// Import action: parses + persists in the background while the rest of
+/// the screen stays interactive (RNF-01); shows success, non-blocking
+/// warnings (C7 scanned PDF) and friendly errors (RF-73).
+class _ImportFab extends ConsumerStatefulWidget {
+  const _ImportFab();
+
+  @override
+  ConsumerState<_ImportFab> createState() => _ImportFabState();
+}
+
+class _ImportFabState extends ConsumerState<_ImportFab> {
+  bool _importing = false;
+
+  Future<void> _import() async {
+    if (_importing) return;
+    setState(() => _importing = true);
+    try {
+      final result = await ref.read(importDocumentProvider)();
+      if (result == null || !mounted) return;
+      _showMessages(result);
+    } on ImportException catch (exception) {
+      if (!mounted) return;
+      _showSnack(exception.message);
+    } on ParserException catch (exception) {
+      if (!mounted) return;
+      _showSnack(exception.message);
+    } catch (_) {
+      if (!mounted) return;
+      _showSnack('No se pudo importar el documento. Inténtalo de nuevo.');
+    } finally {
+      if (mounted) setState(() => _importing = false);
+    }
+  }
+
+  void _showMessages(ImportResult result) {
+    _showSnack('«${result.document.title}» añadido a la biblioteca');
+    if (result.warning == ImportWarning.scannedPdf) {
+      _showSnack(
+        'Este PDF parece estar escaneado. Requiere OCR '
+        '(disponible en versiones futuras).',
+      );
+    }
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      tooltip: 'Importar documento',
+      onPressed: _importing ? null : _import,
+      child: _importing
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.add),
+    );
   }
 }
 
