@@ -13,12 +13,14 @@ import 'package:readspark/presentation/app/providers.dart';
 import '../helpers/fakes.dart';
 
 class _Harness {
-  _Harness(this.library, this.documents, this.files, this.importer);
+  _Harness(this.library, this.documents, this.files, this.importer,
+      this.settings);
 
   final FakeLibraryRepository library;
   final FakeDocumentRepository documents;
   final FakeDocumentFilePort files;
   final FakeImportDocument importer;
+  final FakeSettingsRepository settings;
 }
 
 Future<_Harness> _pumpLibrary(WidgetTester tester) async {
@@ -26,6 +28,7 @@ Future<_Harness> _pumpLibrary(WidgetTester tester) async {
   final documents = FakeDocumentRepository();
   final files = FakeDocumentFilePort();
   final importer = FakeImportDocument();
+  final settings = FakeSettingsRepository();
 
   await tester.pumpWidget(
     ProviderScope(
@@ -34,12 +37,13 @@ Future<_Harness> _pumpLibrary(WidgetTester tester) async {
         documentRepositoryProvider.overrideWithValue(documents),
         documentFilePortProvider.overrideWithValue(files),
         importDocumentProvider.overrideWithValue(importer),
+        settingsRepositoryProvider.overrideWithValue(settings),
       ],
       child: const ReadSparkApp(),
     ),
   );
   await tester.pump();
-  return _Harness(library, documents, files, importer);
+  return _Harness(library, documents, files, importer, settings);
 }
 
 LibraryItem _item(String id, String title, {bool favorite = false}) {
@@ -111,17 +115,20 @@ void main() {
     expect(harness.documents.calls, contains('setFavorite:d1:true'));
   });
 
-  testWidgets('tapping a tile opens it and marks it as last opened',
+  testWidgets('tapping a tile opens the reader (RF-10) and marks it as last opened',
       (tester) async {
     final harness = await _pumpLibrary(tester);
     harness.library.emit([_item('d1', 'Clean Code')]);
+    harness.documents.contents['d1'] = buildReaderContent('d1');
     await tester.pump();
 
     await tester.tap(find.text('Clean Code'));
     await tester.pumpAndSettle();
 
     expect(harness.documents.calls, contains('touchLastOpened:d1'));
-    expect(find.textContaining('Fase 5'), findsOneWidget);
+    expect(find.text('Section A'), findsOneWidget);
+    expect(find.text('First paragraph of A'), findsOneWidget);
+    expect(find.byTooltip('Sección siguiente'), findsOneWidget);
   });
 
   testWidgets('delete asks for confirmation, then removes row and file (RF-06)',
